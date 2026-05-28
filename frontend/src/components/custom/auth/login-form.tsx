@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 const loginSchema = z.object({
-  email: z.string().email("Enter a valid institutional email").endsWith("@gniot.edu.in", "Use @gniot.edu.in email"),
+  email: z.string().email("Enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 

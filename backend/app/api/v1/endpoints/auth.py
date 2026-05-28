@@ -17,14 +17,6 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
 
 
-def _validate_institutional_email(email: str) -> None:
-    if not email.lower().endswith("@gniot.edu.in"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only GNIOT institutional emails are allowed",
-        )
-
-
 def _set_auth_cookie(response: Response, token: str) -> None:
     response.set_cookie(
         key=settings.cookie_name,
@@ -39,8 +31,6 @@ def _set_auth_cookie(response: Response, token: str) -> None:
 
 @router.post("/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, response: Response, db: Session = Depends(get_db)) -> AuthResponse:
-    _validate_institutional_email(payload.email)
-
     existing_user = db.scalar(select(User).where(User.email == payload.email.lower()))
     if existing_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")

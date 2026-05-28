@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Enter your full name"),
-  email: z.string().email().endsWith("@gniot.edu.in", "Use institutional email"),
+  email: z.string().email("Enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   department: z.enum(["CSE-DS", "CSE-CyberSecurity", "General-CSE", "Other"]),
   github_url: z.string().url("Enter a valid GitHub URL").optional().or(z.literal("")),
