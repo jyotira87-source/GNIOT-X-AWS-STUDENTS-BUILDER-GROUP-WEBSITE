@@ -70,6 +70,8 @@ Open `http://localhost:3000`.
 - Backend container image from `backend/Dockerfile` deploys directly to AWS App Runner.
 - Configure App Runner env vars from `backend/.env.example`.
 - Provision PostgreSQL on Amazon RDS and set `DATABASE_URL`.
+- Frontend can also be deployed to Vercel. In Vercel, set the root directory to `frontend` and add:
+  - `NEXT_PUBLIC_API_BASE_URL=https://<your-backend-domain>`
 - Frontend in Amplify Gen 2 should set:
   - `NEXT_PUBLIC_API_BASE_URL=https://<app-runner-service-domain>`
 - Enable CORS by setting backend `FRONTEND_URL` to Amplify domain.
