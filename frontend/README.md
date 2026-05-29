@@ -18,10 +18,12 @@ npm run dev
 	- **Build Command:** `npm run build`
 	- **Install Command:** `npm install`
 4. Add the environment variable:
-	- `NEXT_PUBLIC_API_BASE_URL=https://<your-backend-domain>`
+	- `BACKEND_API_URL=https://<your-backend-domain>`
 5. Deploy.
 
-If your backend is still local, you can point `NEXT_PUBLIC_API_BASE_URL` to your App Runner, Render, Railway, or local tunnel URL.
+If your backend is still local, point `BACKEND_API_URL` to your App Runner, Render, Railway, or local tunnel URL.
+
+The frontend proxies `/api/v1/*` through `frontend/src/app/api/v1/[...path]/route.ts`, so the browser always talks to the same origin.
 
 ## Key Pages
 
