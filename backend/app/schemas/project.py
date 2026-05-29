@@ -28,3 +28,21 @@ class ProjectRead(BaseModel):
 
 class ProjectApproval(BaseModel):
     approved: bool = True
+
+
+class ProjectCommentCreate(BaseModel):
+    content: str = Field(min_length=1)
+
+
+class ProjectCommentRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    project_id: uuid.UUID
+    user_id: uuid.UUID
+    content: str
+    created_at: datetime
+
+
+class UpvoteResponse(BaseModel):
+    total: int

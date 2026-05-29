@@ -9,8 +9,9 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_optional_current_user, require_admin
-from app.models.event import Event
+from app.models.event import Event, EventWaitlist
 from app.models.user import User
+from app.models.notification import Notification
 from app.schemas.event import EventCreate, EventRead
 
 router = APIRouter(prefix="/events", tags=["events"])
@@ -98,6 +99,110 @@ def rsvp_event(event_id: UUID, db: Session = Depends(get_db), current_user: User
         rsvp_count=len(event.rsvps),
         spots_left=max(event.rsvp_limit - len(event.rsvps), 0),
         is_rsvped=True,
+    )
+
+
+
+@router.post("/{event_id}/waitlist", response_model=EventRead)
+def join_waitlist(event_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> EventRead:
+    event = db.scalar(select(Event).options(selectinload(Event.rsvps)).where(Event.id == event_id))
+    if not event:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
+
+    # if already RSVPed, nothing to do
+    if current_user in event.rsvps:
+        pass
+
+    # if spots are available, add as RSVP
+    if len(event.rsvps) < event.rsvp_limit:
+        event.rsvps.append(current_user)
+        db.commit()
+        db.refresh(event)
+        return EventRead(
+            id=event.id,
+            title=event.title,
+            description=event.description,
+            location=event.location,
+            start_time=event.start_time,
+            end_time=event.end_time,
+            rsvp_limit=event.rsvp_limit,
+            rsvp_count=len(event.rsvps),
+            spots_left=max(event.rsvp_limit - len(event.rsvps), 0),
+            is_rsvped=True,
+        )
+
+    # otherwise add to waitlist if not already present
+    existing = db.scalar(select(EventWaitlist).where(EventWaitlist.event_id == event_id, EventWaitlist.user_id == current_user.id))
+    if existing:
+        # already waitlisted
+        pass
+    else:
+        entry = EventWaitlist(event_id=event_id, user_id=current_user.id)
+        db.add(entry)
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+
+    # return current event state
+    db.refresh(event)
+    return EventRead(
+        id=event.id,
+        title=event.title,
+        description=event.description,
+        location=event.location,
+        start_time=event.start_time,
+        end_time=event.end_time,
+        rsvp_limit=event.rsvp_limit,
+        rsvp_count=len(event.rsvps),
+        spots_left=max(event.rsvp_limit - len(event.rsvps), 0),
+        is_rsvped=bool(current_user and any(rsvp_user.id == current_user.id for rsvp_user in event.rsvps)),
+    )
+
+
+@router.delete("/{event_id}/rsvp", response_model=EventRead)
+def cancel_rsvp(event_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> EventRead:
+    event = db.scalar(select(Event).options(selectinload(Event.rsvps)).where(Event.id == event_id))
+    if not event:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
+
+    if current_user not in event.rsvps:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not RSVPed")
+
+    # remove RSVP
+    event.rsvps.remove(current_user)
+    db.commit()
+
+    # promote first waitlist user if exists
+    next_in_line = db.scalar(select(EventWaitlist).where(EventWaitlist.event_id == event_id).order_by(EventWaitlist.created_at.asc()))
+    if next_in_line:
+        # add user to rsvps
+        promoted_user = db.scalar(select(User).where(User.id == next_in_line.user_id))
+        if promoted_user:
+            event.rsvps.append(promoted_user)
+            # remove waitlist entry
+            db.delete(next_in_line)
+            db.commit()
+            # notify the promoted user
+            try:
+                note = Notification(user_id=promoted_user.id, message=f"You've been moved from the waitlist into RSVPs for '{event.title}'", url=f"/events/{event.id}")
+                db.add(note)
+                db.commit()
+            except Exception:
+                db.rollback()
+
+    db.refresh(event)
+    return EventRead(
+        id=event.id,
+        title=event.title,
+        description=event.description,
+        location=event.location,
+        start_time=event.start_time,
+        end_time=event.end_time,
+        rsvp_limit=event.rsvp_limit,
+        rsvp_count=len(event.rsvps),
+        spots_left=max(event.rsvp_limit - len(event.rsvps), 0),
+        is_rsvped=bool(current_user and any(rsvp_user.id == current_user.id for rsvp_user in event.rsvps)),
     )
 
 

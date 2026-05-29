@@ -26,3 +26,5 @@ class EventRead(BaseModel):
     rsvp_count: int
     spots_left: int
     is_rsvped: bool
+    is_waitlisted: bool = False
+    waitlist_position: int | None = None

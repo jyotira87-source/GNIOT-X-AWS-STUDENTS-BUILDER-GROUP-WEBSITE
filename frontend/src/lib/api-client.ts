@@ -49,6 +49,8 @@ export const eventsApi = {
     rsvp_limit: number;
   }) => api.post<EventItem>("/api/v1/events", payload),
   rsvp: (eventId: string) => api.post<EventItem>(`/api/v1/events/${eventId}/rsvp`),
+  cancelRsvp: (eventId: string) => api.delete<EventItem>(`/api/v1/events/${eventId}/rsvp`),
+  joinWaitlist: (eventId: string) => api.post<EventItem>(`/api/v1/events/${eventId}/waitlist`),
   exportCsv: (eventId: string) =>
     api.get<string>(`/api/v1/events/${eventId}/rsvps/export`, {
       responseType: "text",
@@ -67,10 +69,28 @@ export const projectsApi = {
   }) => api.post<ProjectItem>("/api/v1/projects/submit", payload),
   approve: (projectId: string, approved: boolean) =>
     api.patch<ProjectItem>(`/api/v1/projects/${projectId}/approve`, { approved }),
+  comments: {
+    list: (projectId: string) => api.get(`/api/v1/projects/${projectId}/comments`),
+    create: (projectId: string, payload: { content: string }) => api.post(`/api/v1/projects/${projectId}/comments`, payload),
+  },
+  upvotes: {
+    upvote: (projectId: string) => api.post<{ total: number }>(`/api/v1/projects/${projectId}/upvote`),
+    count: (projectId: string) => api.get<{ total: number }>(`/api/v1/projects/${projectId}/upvotes`),
+  },
 };
 
 export const dashboardApi = {
   stats: () => api.get<DashboardStats>("/api/v1/dashboard/stats"),
+};
+
+export const notificationsApi = {
+  list: () => api.get<unknown[]>("/api/v1/notifications"),
+  markRead: (id: string) => api.patch(`/api/v1/notifications/${id}/read`),
+  markAllRead: () => api.patch(`/api/v1/notifications/mark-all-read`),
+};
+
+export const searchApi = {
+  search: (q: string) => api.get(`/api/v1/search`, { params: { q } }),
 };
 
 export default api;

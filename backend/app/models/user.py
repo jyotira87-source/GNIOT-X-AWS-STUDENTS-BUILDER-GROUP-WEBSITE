@@ -31,3 +31,23 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         secondary="event_rsvps",
         back_populates="rsvps",
     )
+    project_comments: Mapped[list["ProjectComment"]] = relationship(
+        "ProjectComment",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    project_upvotes: Mapped[list["ProjectUpvote"]] = relationship(
+        "ProjectUpvote",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    waitlisted_events: Mapped[list["EventWaitlist"]] = relationship(
+        "EventWaitlist",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )

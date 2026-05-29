@@ -42,6 +42,17 @@ export default function EventsPage() {
     try {
       await eventsApi.rsvp(eventId);
       await load();
+    } catch (err: any) {
+      // If the event is full, automatically join the waitlist
+      const message = err?.response?.data?.detail || err?.message;
+      if (message && message.toString().toLowerCase().includes("rsvp limit")) {
+        try {
+          await eventsApi.joinWaitlist(eventId);
+        } catch {
+          // ignore
+        }
+        await load();
+      }
     } finally {
       setLoadingId(null);
     }
