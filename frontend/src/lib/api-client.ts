@@ -32,6 +32,12 @@ export const authApi = {
   verifyEmail: (payload: { token: string }) => api.post<string>("/api/v1/auth/verify-email", payload),
 };
 
+export const userApi = {
+  me: () => api.get<AuthResponse>("/api/v1/users/me"),
+  updateMe: (payload: { name?: string; github_url?: string | null; linkedin_url?: string | null }) =>
+    api.patch<AuthResponse>("/api/v1/users/me", payload),
+};
+
 export const eventsApi = {
   list: () => api.get<EventItem[]>("/api/v1/events"),
   create: (payload: {

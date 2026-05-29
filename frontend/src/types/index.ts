@@ -9,6 +9,7 @@ export interface User {
   department: Department;
   github_url?: string | null;
   linkedin_url?: string | null;
+  email_verified: boolean;
   created_at: string;
   updated_at: string;
 }

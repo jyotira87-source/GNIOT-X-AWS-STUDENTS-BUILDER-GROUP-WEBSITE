@@ -51,6 +51,11 @@ export function Navbar() {
           {user ? (
             <>
               <span className="hidden text-xs text-slate-300 sm:block">{user.name}</span>
+              <Link href="/profile">
+                <Button variant="ghost" size="sm">
+                  Profile
+                </Button>
+              </Link>
               <Button variant="outline" size="sm" onClick={onLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
