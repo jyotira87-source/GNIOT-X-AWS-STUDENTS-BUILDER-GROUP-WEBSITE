@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { EventCard } from "@/components/custom/event-card";
+import { Input } from "@/components/ui/input";
 import { authApi, eventsApi } from "@/lib/api-client";
 import type { EventItem } from "@/types";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
+  const [search, setSearch] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
@@ -22,6 +24,18 @@ export default function EventsPage() {
   useEffect(() => {
     load().catch(() => undefined);
   }, []);
+
+  const filteredEvents = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) {
+      return events;
+    }
+
+    return events.filter((event) => {
+      const haystack = [event.title, event.description, event.location].join(" ").toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [events, search]);
 
   const onRsvp = async (eventId: string) => {
     setLoadingId(eventId);
@@ -39,11 +53,18 @@ export default function EventsPage() {
         <h1 className="text-3xl font-semibold text-white">Events Board</h1>
         <p className="mt-2 text-slate-400">Workshops, hackathons, and lightning sessions from the community.</p>
       </div>
+      <div className="mb-6 max-w-xl">
+        <Input
+          placeholder="Search events by title, location, or description"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {events.map((event) => (
+        {filteredEvents.map((event) => (
           <EventCard key={event.id} event={event} onRsvp={onRsvp} isLoggedIn={isLoggedIn} loadingId={loadingId} />
         ))}
-        {events.length === 0 && <p className="text-sm text-slate-400">No events yet. Check back soon.</p>}
+        {filteredEvents.length === 0 && <p className="text-sm text-slate-400">No matching events found.</p>}
       </div>
     </section>
   );

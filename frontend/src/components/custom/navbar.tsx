@@ -12,6 +12,7 @@ const links = [
   { href: "/events", label: "Events" },
   { href: "/projects", label: "Projects" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/notifications", label: "Notifications" },
 ];
 
 export function Navbar() {

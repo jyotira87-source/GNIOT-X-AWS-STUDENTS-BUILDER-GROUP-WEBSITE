@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ProjectCard } from "@/components/custom/project-card";
 import { ProjectSubmitForm } from "@/components/custom/project-submit-form";
+import { Input } from "@/components/ui/input";
 import { authApi, projectsApi } from "@/lib/api-client";
 import type { ProjectItem } from "@/types";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
   const [loggedIn, setLoggedIn] = useState(false);
 
@@ -31,11 +33,15 @@ export default function ProjectsPage() {
   }, [projects]);
 
   const filteredProjects = useMemo(() => {
-    if (filter === "All") {
-      return projects;
-    }
-    return projects.filter((project) => project.tech_stack.includes(filter));
-  }, [filter, projects]);
+    const query = search.trim().toLowerCase();
+
+    return projects.filter((project) => {
+      const matchesFilter = filter === "All" || project.tech_stack.includes(filter);
+      const haystack = [project.title, project.description, project.github_repo, ...(project.tech_stack || [])].join(" ").toLowerCase();
+      const matchesSearch = !query || haystack.includes(query);
+      return matchesFilter && matchesSearch;
+    });
+  }, [filter, projects, search]);
 
   return (
     <section className="page-shell py-12">
@@ -44,22 +50,30 @@ export default function ProjectsPage() {
           <h1 className="text-3xl font-semibold text-white">Project Registry</h1>
           <p className="mt-2 text-slate-400">Explore approved student projects and submit your own build.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <label htmlFor="filter" className="text-sm text-slate-400">
-            Filter by stack
-          </label>
-          <select
-            id="filter"
-            className="h-10 rounded-xl border border-slate-700 bg-slate-950 px-3 text-sm"
-            value={filter}
-            onChange={(event) => setFilter(event.target.value)}
-          >
-            {filters.map((stack) => (
-              <option key={stack} value={stack}>
-                {stack}
-              </option>
-            ))}
-          </select>
+        <div className="flex w-full max-w-xl flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          <Input
+            className="sm:min-w-80"
+            placeholder="Search projects by title, description, repo, or stack"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <div className="flex items-center gap-2">
+            <label htmlFor="filter" className="text-sm text-slate-400">
+              Filter by stack
+            </label>
+            <select
+              id="filter"
+              className="h-10 rounded-xl border border-slate-700 bg-slate-950 px-3 text-sm"
+              value={filter}
+              onChange={(event) => setFilter(event.target.value)}
+            >
+              {filters.map((stack) => (
+                <option key={stack} value={stack}>
+                  {stack}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
