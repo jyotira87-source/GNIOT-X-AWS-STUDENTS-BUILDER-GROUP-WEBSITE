@@ -2,8 +2,10 @@ import axios from "axios";
 
 import type { AuthResponse, DashboardStats, EventItem, ProjectItem } from "@/types";
 
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: apiBaseUrl,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
