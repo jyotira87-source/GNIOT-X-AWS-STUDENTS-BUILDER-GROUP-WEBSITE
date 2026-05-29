@@ -23,5 +23,6 @@ class UserRead(UserBase):
 
     id: uuid.UUID
     role: UserRole
+    email_verified: bool
     created_at: datetime
     updated_at: datetime

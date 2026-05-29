@@ -23,6 +23,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     github_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     linkedin_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    email_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     created_projects: Mapped[list["Project"]] = relationship("Project", back_populates="creator", cascade="all, delete-orphan")
     rsvp_events: Mapped[list["Event"]] = relationship(

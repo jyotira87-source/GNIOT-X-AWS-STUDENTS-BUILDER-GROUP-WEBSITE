@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     cookie_samesite: Literal["lax", "strict", "none"] = "lax"
 
     admin_seed_email: EmailStr = "leader@gniot.edu.in"
+    # Email / SMTP settings (optional)
+    email_enabled: bool = False
+    smtp_host: str | None = None
+    smtp_port: int | None = None
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_from: EmailStr | None = None
 
 
 @lru_cache

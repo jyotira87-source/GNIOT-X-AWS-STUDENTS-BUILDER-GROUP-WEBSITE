@@ -32,3 +32,23 @@ def decode_access_token(token: str) -> dict[str, Any] | None:
         return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
     except JWTError:
         return None
+
+
+def create_token(subject: str, purpose: str, expires_delta: timedelta | None = None) -> str:
+    """Create a JWT with an additional 'purpose' claim for action-specific tokens.
+
+    Examples of purpose: 'password_reset', 'email_verification'
+    """
+    if expires_delta is None:
+        expires_delta = timedelta(minutes=60)
+
+    expire = datetime.now(timezone.utc) + expires_delta
+    to_encode: dict[str, Any] = {"sub": subject, "purpose": purpose, "exp": expire}
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+
+
+def decode_token(token: str) -> dict[str, Any] | None:
+    try:
+        return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+    except JWTError:
+        return None

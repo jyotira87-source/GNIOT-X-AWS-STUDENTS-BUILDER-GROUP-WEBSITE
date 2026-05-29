@@ -25,6 +25,11 @@ export const authApi = {
   logout: () => api.post("/api/v1/auth/logout"),
 
   me: () => api.get<AuthResponse>("/api/v1/auth/me"),
+  forgotPassword: (payload: { email: string }) => api.post<string>("/api/v1/auth/forgot-password", payload),
+
+  resetPassword: (payload: { token: string; new_password: string }) => api.post<string>("/api/v1/auth/reset-password", payload),
+
+  verifyEmail: (payload: { token: string }) => api.post<string>("/api/v1/auth/verify-email", payload),
 };
 
 export const eventsApi = {
