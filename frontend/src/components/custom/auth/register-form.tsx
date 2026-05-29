@@ -41,8 +41,15 @@ export function RegisterForm() {
         linkedin_url: values.linkedin_url || undefined,
       });
       window.location.href = "/dashboard";
-    } catch {
-      setError("Registration failed. Email may already exist.");
+    } catch (err: any) {
+      const serverMsg = err?.response?.data?.detail || err?.message;
+      if (err?.response?.status === 409) {
+        setError("Email already registered. Try logging in instead.");
+      } else if (serverMsg) {
+        setError(String(serverMsg));
+      } else {
+        setError("Registration failed. Try again.");
+      }
     }
   };
 

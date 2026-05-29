@@ -32,8 +32,15 @@ export function LoginForm() {
     try {
       await authApi.login(values);
       window.location.href = "/dashboard";
-    } catch {
-      setError("Invalid credentials. Try again.");
+    } catch (err: any) {
+      const serverMsg = err?.response?.data?.detail || err?.message;
+      if (err?.response?.status === 401) {
+        setError("Invalid credentials. Check email and password.");
+      } else if (serverMsg) {
+        setError(String(serverMsg));
+      } else {
+        setError("Login failed. Try again.");
+      }
     }
   };
 
